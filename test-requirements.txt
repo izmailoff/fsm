@@ -1,0 +1,8 @@
+nose2
+pytest
+mock
+nosexcover
+mypy
+mongomock
+mongoengine
+testing.postgresql
