@@ -6,8 +6,8 @@ from fsm.fsm import FiniteStateMachine as FSM
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 
-from fsm_postgre.fsm_postgre_models import Base
-from fsm_postgre.fsm_postgre_storage import PostgreStateStorage
+from fsm.fsm_postgre import Base
+from fsm.fsm_postgre.fsm_postgre_storage import PostgreStateStorage
 
 import testing.postgresql
 

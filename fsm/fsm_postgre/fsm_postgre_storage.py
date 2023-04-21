@@ -8,7 +8,7 @@ from fsm.fsm_persistence import StateStorage
 from sqlalchemy import asc, inspect, DateTime
 from sqlalchemy.exc import OperationalError
 
-from fsm_postgre.fsm_postgre_models import StateEntry, StateStatus, StateError
+from fsm.fsm_postgre.fsm_postgre_models import StateEntry, StateStatus, StateError
 from sqlalchemy.orm.session import Session, sessionmaker
 
 logger = logging.getLogger(__name__)

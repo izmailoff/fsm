@@ -6,7 +6,7 @@ from bson import ObjectId
 from fsm import TERMINAL_STATE, INITIAL_STATE
 from fsm.fsm_persistence import StateStorage
 
-from fsm_mongo.fsm_mongo_models import StateEntry, StateStatus, StateError
+from fsm.fsm_mongo.fsm_mongo_models import StateEntry, StateStatus, StateError
 
 
 class MongoStateStorage(StateStorage):

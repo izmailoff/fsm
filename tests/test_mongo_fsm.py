@@ -6,7 +6,7 @@ from mongoengine.connection import get_connection
 
 from mongoengine import connect
 
-from fsm_mongo.fsm_mongo_storage import MongoStateStorage
+from fsm.fsm_mongo.fsm_mongo_storage import MongoStateStorage
 
 from fsm import TERMINAL_STATE, INITIAL_STATE, DEFAULT
 
