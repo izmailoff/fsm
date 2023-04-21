@@ -5,7 +5,7 @@ from datetime import datetime
 from inspect import isfunction
 from typing import Dict, Tuple, Callable, Any, Optional, TypeVar, Union, cast, Generic
 
-from fsm.logging_conf import get_child_logger, add_dynamic_fields_to_logger
+from fsm.logging_conf.logging import get_child_logger, add_dynamic_fields_to_logger
 from fsm import DEFAULT, StateDefinition
 from fsm.fsm_persistence import StateStorage, RunId
 

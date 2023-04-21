@@ -4,8 +4,11 @@ Simple to use persistent Finite State Machine (FSM) for Python projects
 
 ## Prerequisites
 
-    Postgres database or MongoDB for storing state.
-    Python3.10
+Postgres database or MongoDB for storing state.
+
+    sudo apt install postgresql postgresql-contrib
+
+Python3.10
 
 ## Dev Setup
 
