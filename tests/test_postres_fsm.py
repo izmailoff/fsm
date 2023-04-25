@@ -24,7 +24,8 @@ class TestFiniteStateMachine(unittest.TestCase):
         Base.metadata.create_all(self.engine)
         DBSession = sessionmaker(bind=self.engine)
         self.tenant_id = "123"
-        self.db = PostgreStateStorage(DBSession, self.tenant_id)
+        self.match_id = 0
+        self.db = PostgreStateStorage(DBSession, self.tenant_id, self.match_id)
 
     def tearDown(self):
         self.pg.stop()
@@ -52,7 +53,7 @@ class TestFiniteStateMachine(unittest.TestCase):
         })
         self.assertIsNone(self.db.get_last_state())
         fsm.run()
-        transition_action.assert_called_once_with({})
+        transition_action.assert_called_once_with({'match_id': 0})
         self.assert_current_FSM_state(TERMINAL_STATE)
 
     def test_fsm_should_transition_to_failed_state_if_action_failed(self):
@@ -67,7 +68,7 @@ class TestFiniteStateMachine(unittest.TestCase):
 
         self.assertIsNone(self.db.get_last_state())
         fsm.run()
-        transition_action.assert_called_once_with({})
+        transition_action.assert_called_once_with({'match_id': 0})
         failure_transition_action.assert_called_once_with(params)
         self.assert_current_FSM_state(TERMINAL_STATE)
 
@@ -83,7 +84,7 @@ class TestFiniteStateMachine(unittest.TestCase):
 
         self.assertIsNone(self.db.get_last_state())
         fsm.run()
-        transition_action.assert_called_once_with({})
+        transition_action.assert_called_once_with({'match_id': 0})
         next_transition_action.assert_not_called()
         self.assert_current_FSM_state("NEXT")
 
@@ -141,7 +142,7 @@ class TestFiniteStateMachine(unittest.TestCase):
         self.assertEqual(4, len(history_after_run))
         self.assertListEqual([INITIAL_STATE, "NEXT", "ONE_MORE", TERMINAL_STATE], [x.name for x in history_after_run])
         self.assertListEqual([1, 1, 1, 1], [x.visitCount for x in history_after_run])
-        self.assertListEqual([{}, params, {}, {}], [x.params for x in history_after_run])
+        self.assertListEqual([{'match_id': 0}, params, {}, {}], [x.params for x in history_after_run])
 
     def test_multiple_fsm_runs_should_return_correct_current_state(self):
         params = {"val": 1}
@@ -155,7 +156,7 @@ class TestFiniteStateMachine(unittest.TestCase):
 
         self.assertIsNone(self.db.get_last_state())
         fsm.run()
-        transition_action.assert_called_once_with({})
+        transition_action.assert_called_once_with({'match_id': 0})
         next_transition_action.assert_not_called()
         self.assert_current_FSM_state("NEXT")
 

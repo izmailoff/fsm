@@ -36,9 +36,10 @@ def _acquire_db_session(DBSession: sessionmaker) -> Session:
 
 
 class PostgreStateStorage(StateStorage):
-    def __init__(self, DBSession: sessionmaker, tenant_id: str) -> None:
+    def __init__(self, DBSession: sessionmaker, tenant_id: str, match_id: int) -> None:
         self.DBSession = DBSession
         self.tenant_id = tenant_id
+        self.match_id = match_id
         super().__init__()
 
     def get_last_state(self) -> Optional[StateEntry]:
@@ -59,7 +60,7 @@ class PostgreStateStorage(StateStorage):
                                        runId=str(uuid.uuid4()),
                                        startTime=datetime.utcnow(),
                                        endTime=datetime.utcnow(),
-                                       params={},
+                                       params={"match_id": self.match_id},
                                        tenantId=self.tenant_id)
         with _acquire_db_session(self.DBSession) as db_session:
             db_session.add(entry)
