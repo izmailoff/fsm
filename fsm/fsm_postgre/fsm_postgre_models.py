@@ -16,18 +16,18 @@ class StateEntry(Base):
     __tablename__ = 'state_entry'
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    tenantId = Column(String(255), nullable=False)  # TODO: define FK
+    tenant_id = Column(String(255), nullable=False)  # TODO: define FK
     name = Column(String(255), nullable=False)
-    startTime = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
-    endTime = Column(DateTime, nullable=True)
+    start_time = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    end_time = Column(DateTime, nullable=True)
     params = Column(JSON, nullable=False, default=lambda: {})
-    runId = Column(String(255), nullable=False)
-    visitCount = Column(Integer, nullable=False, default=1)
+    run_id = Column(String(255), nullable=False)
+    visit_count = Column(Integer, nullable=False, default=1)
     errors = Column(JSON, nullable=False, default=lambda: [])
     yielded = Column(Boolean, nullable=False, default=False)
 
     def __repr__(self) -> str:
-        return "<StateEntry(id='%s', name='%s', runId='%s')>" % (self.id, self.name, self.runId)
+        return "<StateEntry(id='%s', name='%s', run_id='%s')>" % (self.id, self.name, self.run_id)
 
     def is_initial(self) -> bool:
         return self.name == INITIAL_STATE
@@ -45,11 +45,11 @@ class StateStatus(Base):
     __tablename__ = 'state_status'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    tenantId = Column(String(255), nullable=False)  # TODO: define FK
-    lastStateId = Column(BigInteger, nullable=False)
-    updateTime = Column(DateTime, nullable=False)
-    refStateName = Column(String(255), nullable=False)
+    tenant_id = Column(String(255), nullable=False)  # TODO: define FK
+    last_state_id = Column(BigInteger, nullable=False)
+    update_time = Column(DateTime, nullable=False)
+    ref_state_name = Column(String(255), nullable=False)
 
     def __repr__(self) -> str:
-        return "<StateStatus(lastStateId='%s', updateTime='%s', refStateName='%s')>" % (
-        self.lastStateId, self.updateTime, self.refStateName)
+        return "<StateStatus(last_state_id='%s', update_time='%s', ref_state_name='%s')>" % (
+            self.last_state_id, self.update_time, self.ref_state_name)

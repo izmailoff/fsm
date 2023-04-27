@@ -35,7 +35,7 @@ class DynamicDict(collections.abc.Mapping):
 
 
 default_format = '%(log_color)s[%(levelname)s]%(reset)s %(asctime)s - %(threadName)s - %(name)s - %(tenant)s - ' \
-                 '%(runid)s - %(jobid)s - %(message)s'
+                 '%(run_id)s - %(jobid)s - %(message)s'
 
 default_extra = {'tenant': None, 'runid': None, 'jobid': None}
 

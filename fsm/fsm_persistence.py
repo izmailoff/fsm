@@ -9,11 +9,11 @@ RunId = TypeVar('RunId', int, str, UUID)
 
 
 class StateEntryT(Generic[RunId]):
-    runId: RunId
+    run_id: RunId
     name: str
     yielded: bool
     params: Dict[str, Any]
-    visitCount: int
+    visit_count: int
 
     def is_terminal(self) -> bool:
         raise NotImplementedError

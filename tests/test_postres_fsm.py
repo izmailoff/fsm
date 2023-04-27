@@ -141,7 +141,7 @@ class TestFiniteStateMachine(unittest.TestCase):
         self.assertTrue(history_after_run)
         self.assertEqual(4, len(history_after_run))
         self.assertListEqual([INITIAL_STATE, "NEXT", "ONE_MORE", TERMINAL_STATE], [x.name for x in history_after_run])
-        self.assertListEqual([1, 1, 1, 1], [x.visitCount for x in history_after_run])
+        self.assertListEqual([1, 1, 1, 1], [x.visit_count for x in history_after_run])
         self.assertListEqual([{'match_id': 0}, params, {}, {}], [x.params for x in history_after_run])
 
     def test_multiple_fsm_runs_should_return_correct_current_state(self):

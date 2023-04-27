@@ -45,23 +45,23 @@ class PostgreStateStorage(StateStorage):
     def get_last_state(self) -> Optional[StateEntry]:
         with _acquire_db_session(self.DBSession) as db_session:
             last_state = db_session.query(StateStatus).\
-                filter(StateStatus.tenantId == self.tenant_id).\
+                filter(StateStatus.tenant_id == self.tenant_id).\
                 first()
             if last_state:
                 return db_session.query(StateEntry).\
-                    filter(StateEntry.tenantId == self.tenant_id).\
-                    filter(StateEntry.id == last_state.lastStateId).\
+                    filter(StateEntry.tenant_id == self.tenant_id).\
+                    filter(StateEntry.id == last_state.last_state_id).\
                     first()
             else:
                 return None
 
     def new_initial_state(self) -> StateEntry:
         entry: StateEntry = StateEntry(name=INITIAL_STATE,
-                                       runId=str(uuid.uuid4()),
-                                       startTime=datetime.utcnow(),
-                                       endTime=datetime.utcnow(),
+                                       run_id=str(uuid.uuid4()),
+                                       start_time=datetime.utcnow(),
+                                       end_time=datetime.utcnow(),
                                        params={"match_id": self.match_id},
-                                       tenantId=self.tenant_id)
+                                       tenant_id=self.tenant_id)
         with _acquire_db_session(self.DBSession) as db_session:
             db_session.add(entry)
         return entry
@@ -70,8 +70,8 @@ class PostgreStateStorage(StateStorage):
         with _acquire_db_session(self.DBSession) as db_session:
             existing_state: Optional[StateEntry] = db_session.query(StateEntry).\
                 filter(StateEntry.name == state.name).\
-                filter(StateEntry.tenantId == self.tenant_id).\
-                filter(StateEntry.runId == state.runId).\
+                filter(StateEntry.tenant_id == self.tenant_id).\
+                filter(StateEntry.run_id == state.run_id).\
                 first()
             if existing_state is None:
                 db_session.add(state)
@@ -84,8 +84,8 @@ class PostgreStateStorage(StateStorage):
     def find_state(self, state_name: str, run_id: str) -> StateEntry:
         with _acquire_db_session(self.DBSession) as db_session:
             return db_session.query(StateEntry).\
-                filter(StateEntry.runId == run_id). \
-                filter(StateEntry.tenantId == self.tenant_id).\
+                filter(StateEntry.run_id == run_id). \
+                filter(StateEntry.tenant_id == self.tenant_id).\
                 filter(StateEntry.name == state_name).\
                 first()
 
@@ -101,11 +101,11 @@ class PostgreStateStorage(StateStorage):
 
     def terminate(self, run_id: str) -> None:
         state = StateEntry(name=TERMINAL_STATE,
-                           startTime=datetime.utcnow(),
-                           endTime=datetime.utcnow(),
+                           start_time=datetime.utcnow(),
+                           end_time=datetime.utcnow(),
                            errors=[StateError(error="Max retry count reached", visit_idx=1)],
-                           runId=run_id,
-                           tenantId=self.tenant_id)
+                           run_id=run_id,
+                           tenant_id=self.tenant_id)
         self._upsert_state(state)
 
     def set_current_state(self, state_name: str, run_id: str, err: Optional[str], params: JsonParams,
@@ -113,21 +113,21 @@ class PostgreStateStorage(StateStorage):
         existing_state = self.find_state(state_name, run_id)
         if existing_state:
             if err:
-                existing_state.errors.append(StateError(error=err, visit_idx=existing_state.visitCount + 1))
+                existing_state.errors.append(StateError(error=err, visit_idx=existing_state.visit_count + 1))
             existing_state.params = params
-            existing_state.startTime = start_time
-            existing_state.endTime = end_time
-            existing_state.visitCount += 1
+            existing_state.start_time = start_time
+            existing_state.end_time = end_time
+            existing_state.visit_count += 1
             self.save_state(existing_state)
         else:
             state = StateEntry(name=state_name,
-                               startTime=start_time,
-                               endTime=end_time,
+                               start_time=start_time,
+                               end_time=end_time,
                                errors=[StateError(error=err, visit_idx=1)] if err else [],
                                params=params,
-                               runId=run_id,
-                               visitCount=1,
-                               tenantId=self.tenant_id)
+                               run_id=run_id,
+                               visit_count=1,
+                               tenant_id=self.tenant_id)
             self._upsert_state(state)
 
     def get_db_history(self) -> List[StateEntry]:
@@ -138,12 +138,12 @@ class PostgreStateStorage(StateStorage):
         inspect(state)
         with _acquire_db_session(self.DBSession) as db_session:
             status: StateStatus = db_session.query(StateStatus).\
-                filter(StateStatus.tenantId == self.tenant_id).\
+                filter(StateStatus.tenant_id == self.tenant_id).\
                 first()
             if status is not None:
                 db_session.delete(status)
-            status = StateStatus(lastStateId=state.id,
-                                 refStateName=state.name,
-                                 updateTime=datetime.utcnow(),
-                                 tenantId=self.tenant_id)
+            status = StateStatus(last_state_id=state.id,
+                                 ref_state_name=state.name,
+                                 update_time=datetime.utcnow(),
+                                 tenant_id=self.tenant_id)
             db_session.add(status)

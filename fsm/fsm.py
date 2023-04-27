@@ -42,7 +42,7 @@ class FiniteStateMachine(Generic[RunId]):
         self.pipeline_str = {k: (v[1:]) for k, v in self.state_transitions.items()}
         self.run_id: Optional[RunId] = None
         self.logger = get_child_logger("", "fsm", log_extra)
-        add_dynamic_fields_to_logger(self.logger, {'runid': self._get_run_id})
+        add_dynamic_fields_to_logger(self.logger, {'run_id': self._get_run_id})
 
     def _get_run_id(self) -> str:
         return str(self.run_id)
@@ -57,12 +57,12 @@ class FiniteStateMachine(Generic[RunId]):
         last_state = self.store.get_last_state()
         if not last_state or (last_state.is_terminal() and current_run_id is None):
             current_state = self.store.new_initial_state()
-            self.logger.debug("Starting a new run with run ID [{}].".format(current_state.runId))
+            self.logger.debug("Starting a new run with run ID [{}].".format(current_state.run_id))
             self.store.save_state(current_state)
         else:
             current_state = last_state
-        self.run_id = current_state.runId
-        self.logger.info("Current state is: [{}] for run ID [{}].".format(current_state.name, current_state.runId))
+        self.run_id = current_state.run_id
+        self.logger.info("Current state is: [{}] for run ID [{}].".format(current_state.name, current_state.run_id))
         transition, success_state, failure_state, continue_run = self.state_transitions[current_state.name]
         if not transition:
             self.logger.info("No transition step defined. Nothing else to do, terminating.")
@@ -80,7 +80,7 @@ class FiniteStateMachine(Generic[RunId]):
                     self.logger.info("Yielding execution of the next state until next run.")
                     return None
             self.logger.info("Checking if next state has been visited before.")
-            if self._max_visits_exceeded(success_state, current_state.runId):
+            if self._max_visits_exceeded(success_state, current_state.run_id):
                 return None
             else:
                 start_time = datetime.utcnow()
@@ -88,23 +88,23 @@ class FiniteStateMachine(Generic[RunId]):
                 is_successful, err, params = self.with_state_transition_result(transition)(current_state.params)
                 self.logger.debug("Transition from {} to {} finished with new params {}.".format(current_state.name, success_state, params))
                 end_time = datetime.utcnow()
-                if not is_successful and self._max_visits_exceeded(failure_state, current_state.runId):
+                if not is_successful and self._max_visits_exceeded(failure_state, current_state.run_id):
                     return None
                 next_state = success_state if is_successful else failure_state
-                self.store.set_current_state(next_state, current_state.runId, err, params, start_time, end_time)
-                return lambda: self._advance_to_next(current_state.runId)
+                self.store.set_current_state(next_state, current_state.run_id, err, params, start_time, end_time)
+                return lambda: self._advance_to_next(current_state.run_id)
 
     def _max_visits_exceeded(self, state_name: str, run_id: RunId) -> bool:
         next_state = self.store.find_state(state_name, run_id)
         success_visit_limit = self.max_visits.get(state_name, self.max_visits[DEFAULT])
-        if next_state and next_state.visitCount >= success_visit_limit:
+        if next_state and next_state.visit_count >= success_visit_limit:
             self.logger.warning("Maximum attempts for state [{}] reached. Terminating.".format(state_name))
-            self.store.terminate(next_state.runId)
+            self.store.terminate(next_state.run_id)
             self.logger.debug("Successfully saved terminal state for run ID [{}].".format(run_id))
             return True
         else:
             if next_state:
-                visits = next_state.visitCount + 1
+                visits = next_state.visit_count + 1
             else:
                 visits = 1
             self.logger.info("Visited state [{}] {} out of max {} times.".format(state_name, visits, success_visit_limit))

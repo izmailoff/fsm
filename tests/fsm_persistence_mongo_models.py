@@ -15,11 +15,11 @@ class StateEntry(Document):
             #'indexes': ['modelInfo.version']}
 
     name = StringField(required=True)
-    startTime = DateTimeField(required=True)
-    endTime = DateTimeField(required=True)
+    start_time = DateTimeField(required=True)
+    end_time = DateTimeField(required=True)
     params = DictField(required=False, default={})
-    runId = ObjectIdField(required=True, default=ObjectId) # ??? remove default
-    visitCount = IntField(required=True, default=1)
+    run_id = ObjectIdField(required=True, default=ObjectId) # ??? remove default
+    visit_count = IntField(required=True, default=1)
     errors = EmbeddedDocumentListField(StateError, default=[])
     yielded = BooleanField(required=True, default=False)
 
@@ -33,6 +33,6 @@ class StateEntry(Document):
 class StateStatus(Document):
     meta = {'collection': 'fsm_status'}
 
-    lastStateId = ObjectIdField(required=True)
-    updateTime = DateTimeField(required=True)
-    refStateName = StringField(required=True)
+    last_state_id = ObjectIdField(required=True)
+    update_time = DateTimeField(required=True)
+    ref_state_name = StringField(required=True)
