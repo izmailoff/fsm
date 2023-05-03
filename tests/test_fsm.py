@@ -84,7 +84,8 @@ class TestFiniteStateMachine(unittest.TestCase):
         self.assert_current_FSM_state(TERMINAL_STATE)
 
     def test_state_transition_result_decorator_should_return_false_on_exception(self):
-        expected_err_str = "class: [<class 'Exception'>], doc: [Common base class for all non-exit exceptions.], msg: [total fail]"
+        expected_err_str = "class: [<class 'Exception'>], " \
+                           "doc: [Common base class for all non-exit exceptions.], msg: [total fail]"
 
         fsm = FSM(self.db, {})
         @fsm.with_state_transition_result
@@ -242,4 +243,3 @@ class TestFiniteStateMachine(unittest.TestCase):
 
         fsm.run()
         self.assertTrue(True)
-

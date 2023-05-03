@@ -11,8 +11,8 @@ from fsm.fsm_postgre.fsm_postgre_storage import PostgreStateStorage
 
 import testing.postgresql
 
-
 testing.postgresql.SEARCH_PATHS.extend(glob('/opt/local/lib/postgresql*') + glob('/usr/local/opt/postgresql*'))
+
 
 class TestFiniteStateMachine(unittest.TestCase):
 
@@ -25,7 +25,7 @@ class TestFiniteStateMachine(unittest.TestCase):
         DBSession = sessionmaker(bind=self.engine)
         self.tenant_id = "123"
         self.match_id = 0
-        self.db = PostgreStateStorage(DBSession, self.tenant_id, self.match_id)
+        self.db = PostgreStateStorage(DBSession, self.tenant_id)
 
     def tearDown(self):
         self.pg.stop()
@@ -93,9 +93,11 @@ class TestFiniteStateMachine(unittest.TestCase):
         self.assert_current_FSM_state(TERMINAL_STATE)
 
     def test_state_transition_result_decorator_should_return_false_on_exception(self):
-        expected_err_str = "class: [<class 'Exception'>], doc: [Common base class for all non-exit exceptions.], msg: [total fail]"
+        expected_err_str = "class: [<class 'Exception'>], " \
+                           "doc: [Common base class for all non-exit exceptions.], msg: [total fail]"
 
         fsm = FSM(self.db, {})
+
         @fsm.with_state_transition_result
         def exception_throwing_function():
             raise Exception("total fail")
@@ -110,6 +112,7 @@ class TestFiniteStateMachine(unittest.TestCase):
         expected_result = {"smth": 1}
 
         fsm = FSM(self.db, {})
+
         @fsm.with_state_transition_result
         def successful_function():
             return expected_result
@@ -208,9 +211,9 @@ class TestFiniteStateMachine(unittest.TestCase):
             INITIAL_STATE: (transition_action, "NEXT", "NOT-EXISTENT", True),
             "NEXT": (next_transition_action, TERMINAL_STATE, "NEXT", False),
             TERMINAL_STATE: (None, None, None, False)
-            },
-            {DEFAULT: 2}
-        )
+        },
+                  {DEFAULT: 2}
+                  )
 
         self.assertIsNone(self.db.get_last_state())
         fsm.run()

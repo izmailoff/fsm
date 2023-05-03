@@ -36,17 +36,17 @@ def _acquire_db_session(DBSession: sessionmaker) -> Session:
 
 
 class PostgreStateStorage(StateStorage):
-    def __init__(self, DBSession: sessionmaker, tenant_id: str, match_id: int) -> None:
+    def __init__(self, DBSession: sessionmaker, tenant_id: str) -> None:
         self.DBSession = DBSession
         self.tenant_id = tenant_id
-        self.match_id = match_id
         super().__init__()
 
-    def get_last_state(self) -> Optional[StateEntry]:
+    def get_last_state(self, run_id: Optional[str]) -> Optional[StateEntry]:
         with _acquire_db_session(self.DBSession) as db_session:
-            last_state = db_session.query(StateStatus).\
-                filter(StateStatus.tenant_id == self.tenant_id).\
-                first()
+            last_state_query = db_session.query(StateStatus).filter(StateStatus.tenant_id == self.tenant_id)
+            if run_id is not None:
+                last_state_query = last_state_query.filter(StateStatus.run_id == run_id)
+            last_state = last_state_query.first()
             if last_state:
                 return db_session.query(StateEntry).\
                     filter(StateEntry.tenant_id == self.tenant_id).\
@@ -55,12 +55,12 @@ class PostgreStateStorage(StateStorage):
             else:
                 return None
 
-    def new_initial_state(self) -> StateEntry:
+    def new_initial_state(self, params=None) -> StateEntry:
         entry: StateEntry = StateEntry(name=INITIAL_STATE,
                                        run_id=str(uuid.uuid4()),
                                        start_time=datetime.utcnow(),
                                        end_time=datetime.utcnow(),
-                                       params={"match_id": self.match_id},
+                                       params=params,
                                        tenant_id=self.tenant_id)
         with _acquire_db_session(self.DBSession) as db_session:
             db_session.add(entry)

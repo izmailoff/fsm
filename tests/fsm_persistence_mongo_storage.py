@@ -10,16 +10,16 @@ from tests.fsm_persistence_mongo_models import StateEntry, StateStatus, StateErr
 
 class MongoStateStorage(StateStorage):
 
-    def get_last_state(self) -> Optional[StateEntry]:
+    def get_last_state(self, run_id: Optional[str]) -> Optional[StateEntry]:
         last_state = StateStatus.objects().first()
         if last_state:
             return StateEntry.objects(id=last_state.last_state_id).first()
         else:
             return None
 
-    def new_initial_state(self):
+    def new_initial_state(self, params=None):
         return StateEntry(name=INITIAL_STATE, start_time=datetime.utcnow(),
-                          end_time=datetime.utcnow(), params={})
+                          end_time=datetime.utcnow(), params=params)
 
     def _upsert_state(self, state: StateEntry) -> None:
         state = StateEntry.objects(name=state.name, run_id=state.run_id).modify(

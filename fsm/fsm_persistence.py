@@ -21,10 +21,10 @@ class StateEntryT(Generic[RunId]):
 
 class StateStorage(Generic[RunId]):
 
-    def get_last_state(self) -> Optional[StateEntryT[RunId]]:
+    def get_last_state(self, run_id: Optional[RunId]) -> Optional[StateEntryT[RunId]]:
         pass
 
-    def new_initial_state(self) -> StateEntryT[RunId]:
+    def new_initial_state(self, params=None) -> StateEntryT[RunId]:
         pass
 
     def save_state(self, state: StateEntryT[RunId]) -> None:
@@ -48,4 +48,3 @@ class StateStorage(Generic[RunId]):
 
     def set_last_state(self, state: StateEntryT[RunId]) -> None:
         pass
-

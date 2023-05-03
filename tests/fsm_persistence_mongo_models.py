@@ -11,14 +11,14 @@ class StateError(EmbeddedDocument):
 
 
 class StateEntry(Document):
-    meta = {'collection': 'fsm_log'} #,
-            #'indexes': ['modelInfo.version']}
+    meta = {'collection': 'fsm_log'}  # ,
+    # 'indexes': ['modelInfo.version']}
 
     name = StringField(required=True)
     start_time = DateTimeField(required=True)
     end_time = DateTimeField(required=True)
     params = DictField(required=False, default={})
-    run_id = ObjectIdField(required=True, default=ObjectId) # ??? remove default
+    run_id = ObjectIdField(required=True, default=ObjectId)  # ??? remove default
     visit_count = IntField(required=True, default=1)
     errors = EmbeddedDocumentListField(StateError, default=[])
     yielded = BooleanField(required=True, default=False)

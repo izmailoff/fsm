@@ -11,22 +11,22 @@ from fsm.fsm_mongo.fsm_mongo_models import StateEntry, StateStatus, StateError
 
 class MongoStateStorage(StateStorage):
 
-    def get_last_state(self) -> Optional[StateEntry]:
+    def get_last_state(self, run_id: Optional[str]) -> Optional[StateEntry]:
         last_state = StateStatus.objects().first()
         if last_state:
             return StateEntry.objects(id=last_state.last_state_id).first()
         else:
             return None
 
-    def new_initial_state(self):
+    def new_initial_state(self, params=None):
         return StateEntry(name=INITIAL_STATE, start_time=datetime.utcnow(),
-                          end_time=datetime.utcnow(), params={})
+                          end_time=datetime.utcnow(), params=params)
 
     def _upsert_state(self, state: StateEntry) -> None:
         state = StateEntry.objects(name=state.name, run_id=state.run_id).modify(
-            upsert=True, new=True, set__start_time=state.start_time, set__end_time=state.end_time, set__params=state.params,
-            set__visit_count=state.visit_count, set__errors=state.errors, set__yielded=state.yielded
-        )
+            upsert=True, new=True, set__start_time=state.start_time, set__end_time=state.end_time,
+            set__params=state.params, set__visit_count=state.visit_count, set__errors=state.errors,
+            set__yielded=state.yielded)
         self.set_last_state(state)
 
     def find_state(self, state_name: str, run_id: ObjectId) -> StateEntry:

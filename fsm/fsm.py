@@ -47,14 +47,15 @@ class FiniteStateMachine(Generic[RunId]):
     def _get_run_id(self) -> str:
         return str(self.run_id)
 
-    def run(self) -> None:
+    def run(self, run_id: Optional[RunId] = None) -> None:
         self.logger.debug("Run function called.")
-        trampoline(self._advance_to_next)()
+        self.run_id = run_id
+        trampoline(self._advance_to_next)(self.run_id)
 
     def _advance_to_next(self, current_run_id: Optional[RunId] = None) -> U:
         self.logger.info("Started FSM execution. Trying to advance to the next state of pipeline.")
         self.logger.debug("PIPELINE: {}.".format(self.pipeline_str))
-        last_state = self.store.get_last_state()
+        last_state = self.store.get_last_state(current_run_id)
         if not last_state or (last_state.is_terminal() and current_run_id is None):
             current_state = self.store.new_initial_state()
             self.logger.debug("Starting a new run with run ID [{}].".format(current_state.run_id))
@@ -84,9 +85,11 @@ class FiniteStateMachine(Generic[RunId]):
                 return None
             else:
                 start_time = datetime.utcnow()
-                self.logger.debug("Entering transition from {} to {} with params {}.".format(current_state.name, success_state, current_state.params))
+                self.logger.debug("Entering transition from {} to {} with "
+                                  "params {}.".format(current_state.name, success_state, current_state.params))
                 is_successful, err, params = self.with_state_transition_result(transition)(current_state.params)
-                self.logger.debug("Transition from {} to {} finished with new params {}.".format(current_state.name, success_state, params))
+                self.logger.debug("Transition from {} to {} finished with new "
+                                  "params {}.".format(current_state.name, success_state, params))
                 end_time = datetime.utcnow()
                 if not is_successful and self._max_visits_exceeded(failure_state, current_state.run_id):
                     return None
@@ -107,7 +110,8 @@ class FiniteStateMachine(Generic[RunId]):
                 visits = next_state.visit_count + 1
             else:
                 visits = 1
-            self.logger.info("Visited state [{}] {} out of max {} times.".format(state_name, visits, success_visit_limit))
+            self.logger.info("Visited state [{}] {} out of max {} times.".format(state_name, visits,
+                                                                                 success_visit_limit))
             return False
 
     def with_state_transition_result(self, func: FsmAction) -> Callable[..., FsmTransitionResult]:
@@ -127,5 +131,3 @@ class FiniteStateMachine(Generic[RunId]):
                 self.logger.exception(e)
                 return False, "class: [{}], doc: [{}], msg: [{}]".format(e.__class__, e.__doc__, str(e)), {}
         return wrapper
-
-

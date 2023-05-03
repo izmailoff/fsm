@@ -13,4 +13,3 @@ TransitionActionResult = Tuple[bool, Optional[str], JsonParams]
 TransitionAction = Callable[[JsonParams], TransitionActionResult]
 
 StateDefinition = Dict[str, Tuple[Optional[TransitionAction], str, str, bool]]
-
