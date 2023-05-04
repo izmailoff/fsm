@@ -44,14 +44,13 @@ class PostgreStateStorage(StateStorage):
     def get_last_state(self, run_id: Optional[str]) -> Optional[StateEntry]:
         with _acquire_db_session(self.DBSession) as db_session:
             last_state_query = db_session.query(StateStatus).filter(StateStatus.tenant_id == self.tenant_id)
-            if run_id is not None:
-                last_state_query = last_state_query.filter(StateStatus.run_id == run_id)
             last_state = last_state_query.first()
             if last_state:
-                return db_session.query(StateEntry).\
-                    filter(StateEntry.tenant_id == self.tenant_id).\
-                    filter(StateEntry.id == last_state.last_state_id).\
-                    first()
+                last_state_entry_query = db_session.query(StateEntry).\
+                    filter(StateEntry.tenant_id == self.tenant_id).filter(StateEntry.id == last_state.last_state_id)
+                if run_id is not None:
+                    last_state_entry_query = last_state_entry_query.filter(StateEntry.run_id == run_id)
+                return last_state_entry_query.first()
             else:
                 return None
 
