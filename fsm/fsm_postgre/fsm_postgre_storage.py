@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Optional, List
 from fsm import TERMINAL_STATE, INITIAL_STATE, JsonParams
 from fsm.fsm_persistence import StateStorage
-from sqlalchemy import asc, inspect, DateTime
+from sqlalchemy import asc, inspect, DateTime, desc
 from sqlalchemy.exc import OperationalError
 
 from fsm.fsm_postgre.fsm_postgre_models import StateEntry, StateStatus, StateError
@@ -46,7 +46,7 @@ class PostgreStateStorage(StateStorage):
             last_state_query = db_session.query(StateEntry).filter(StateEntry.tenant_id == self.tenant_id)
             if run_id is not None:
                 last_state_query = last_state_query.filter(StateEntry.run_id == run_id)
-            last_state = last_state_query.first()
+            last_state = last_state_query.order_by(desc(StateEntry.id)).first()
             if last_state is not None:
                 return last_state
             else:
