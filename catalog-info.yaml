@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: fsm
+  annotations:
+    github.com/project-slug: izmailoff/fsm
+spec:
+  type: other
+  lifecycle: unknown
+  owner: guests
